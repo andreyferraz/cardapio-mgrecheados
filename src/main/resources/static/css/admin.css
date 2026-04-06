@@ -1,0 +1,288 @@
+:root {
+    --primary-red: #e74c3c;
+    --gold-main: #f1c40f;
+    --gold-dark: #d4ac0d;
+    --ember-dark: #2c1a0e;
+    --ivory: #fdfefe;
+    --surface-cream: #fff8eb;
+    --surface-dark: #3a2415;
+    --ok-green: #1f9d59;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    font-family: "Lato", "Segoe UI", sans-serif;
+    min-height: 100%;
+}
+
+.admin-bg {
+    background:
+        radial-gradient(circle at 8% 10%, rgba(241, 196, 15, 0.2), transparent 34%),
+        radial-gradient(circle at 92% 5%, rgba(231, 76, 60, 0.2), transparent 30%),
+        linear-gradient(180deg, #211308 0%, #2c1a0e 36%, #2f1b0f 100%);
+    color: var(--ivory);
+}
+
+.auth-shell {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.2rem;
+}
+
+.auth-card {
+    width: min(100%, 430px);
+    background: linear-gradient(180deg, rgba(58, 36, 21, 0.96), rgba(39, 23, 13, 0.98));
+    border: 1px solid rgba(241, 196, 15, 0.45);
+    border-radius: 18px;
+    padding: 1.15rem;
+    box-shadow: 0 18px 34px rgba(13, 8, 5, 0.36);
+}
+
+.auth-logo {
+    width: 3.2rem;
+    height: 3.2rem;
+    border-radius: 999px;
+    display: block;
+    margin: 0 auto 0.7rem;
+    border: 1px solid rgba(241, 196, 15, 0.6);
+}
+
+.auth-card h1 {
+    margin: 0;
+    font-family: "Alfa Slab One", serif;
+    font-size: 1.2rem;
+    color: var(--gold-main);
+    text-align: center;
+}
+
+.auth-card p {
+    margin: 0.45rem 0 0.95rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: rgba(253, 254, 254, 0.9);
+}
+
+.auth-form {
+    display: grid;
+    gap: 0.55rem;
+}
+
+.auth-form label {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--gold-main);
+}
+
+.auth-form input {
+    border: 1px solid rgba(241, 196, 15, 0.35);
+    border-radius: 10px;
+    padding: 0.76rem;
+    background: #fff;
+    color: #2c1a0e;
+}
+
+.auth-form button,
+.primary-btn {
+    border: 0;
+    border-radius: 12px;
+    padding: 0.78rem 1rem;
+    background: linear-gradient(180deg, #ce3a2d, #a92a1f);
+    color: #fff;
+    font-weight: 900;
+    text-decoration: none;
+    text-align: center;
+}
+
+.admin-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 0.9rem;
+    background: linear-gradient(180deg, rgba(44, 26, 14, 0.96), rgba(44, 26, 14, 0.76));
+    border-bottom: 1px solid rgba(241, 196, 15, 0.45);
+}
+
+.admin-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.admin-brand-logo {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 999px;
+    border: 1px solid rgba(241, 196, 15, 0.55);
+}
+
+.admin-brand h1 {
+    margin: 0;
+    font-family: "Alfa Slab One", serif;
+    font-size: 1rem;
+    color: var(--gold-main);
+}
+
+.admin-brand p {
+    margin: 0.2rem 0 0;
+    font-size: 0.72rem;
+    color: rgba(253, 254, 254, 0.85);
+}
+
+.admin-content {
+    padding: 1rem 0.9rem 1.5rem;
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+.actions-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.9rem;
+}
+
+.ghost-btn {
+    border: 1px solid rgba(241, 196, 15, 0.55);
+    background: transparent;
+    color: var(--gold-main);
+    border-radius: 10px;
+    padding: 0.6rem 0.72rem;
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.admin-grid {
+    display: grid;
+    gap: 0.85rem;
+}
+
+.admin-product-card {
+    background: var(--surface-cream);
+    color: var(--ember-dark);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.admin-product-image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+.admin-product-body {
+    padding: 0.8rem;
+}
+
+.admin-product-body h2 {
+    margin: 0;
+    color: var(--ember-dark);
+    font-size: 1rem;
+}
+
+.admin-product-body p {
+    margin: 0.4rem 0;
+}
+
+.meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: 0.75rem;
+}
+
+.danger-btn {
+    border: 0;
+    border-radius: 10px;
+    padding: 0.6rem 0.72rem;
+    background: #b22f23;
+    color: #fff;
+    font-weight: 700;
+}
+
+.form-content {
+    max-width: 680px;
+}
+
+.admin-form {
+    background: var(--surface-cream);
+    color: var(--ember-dark);
+    border-radius: 14px;
+    padding: 0.95rem;
+    display: grid;
+    gap: 0.55rem;
+}
+
+.admin-form input,
+.admin-form textarea {
+    border: 1px solid rgba(44, 26, 14, 0.3);
+    border-radius: 10px;
+    padding: 0.7rem;
+    font: inherit;
+}
+
+.inline-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.2rem 0;
+}
+
+.current-image {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.current-image img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.alert {
+    border-radius: 10px;
+    padding: 0.65rem 0.75rem;
+    margin-bottom: 0.7rem;
+    font-size: 0.9rem;
+}
+
+.alert.success {
+    background: rgba(15, 88, 50, 0.82);
+    border: 1px solid rgba(53, 176, 109, 0.72);
+    color: #f5fff9;
+}
+
+.alert.error {
+    background: rgba(178, 47, 35, 0.2);
+    border: 1px solid rgba(178, 47, 35, 0.5);
+    color: #ffd8d4;
+}
+
+.empty-card {
+    background: rgba(253, 254, 254, 0.08);
+    border: 1px dashed rgba(241, 196, 15, 0.55);
+    border-radius: 14px;
+    padding: 1rem;
+}
+
+@media (min-width: 820px) {
+    .admin-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}

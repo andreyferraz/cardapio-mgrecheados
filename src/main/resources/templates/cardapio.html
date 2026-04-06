@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>MG Recheados | Cardapio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/cardapio.css}">
+</head>
+<body>
+<header class="topbar">
+    <div class="brand-wrap">
+        <img class="brand-logo" th:src="@{/img/logo.png}" src="/img/logo.png" alt="Logo MG Recheados">
+        <div class="brand-block">
+            <h1 class="brand-title">MG Recheados</h1>
+            <p class="brand-subtitle">Cardapio digital artesanal</p>
+        </div>
+        <span class="brand-star" aria-hidden="true">★</span>
+    </div>
+</header>
+
+<main class="content">
+    <section class="intro-panel">
+        <p class="intro-kicker">Sabor de churrasco em cada mordida</p>
+        <h2>Monte seu pedido em poucos toques</h2>
+        <p>Escolha os recheados, ajuste as quantidades e finalize direto no WhatsApp.</p>
+    </section>
+
+    <section class="menu-grid" id="menuGrid">
+        <article class="product-card"
+                 th:each="produto : ${produtos}"
+                 th:data-id="${produto.id}"
+                 th:data-nome="${produto.nome}"
+                 th:data-preco="${produto.preco}"
+                 th:data-peso="${produto.peso}">
+            <div class="product-image-wrap">
+                <img class="product-image"
+                     th:src="@{'/uploads/' + ${produto.imagemUrl}}"
+                     th:alt="${produto.nome}">
+                <span class="product-badge">Destaque</span>
+            </div>
+            <div class="product-body">
+                <h3 th:text="${produto.nome}">Produto</h3>
+                <p class="product-description" th:text="${produto.descricao}">Descricao do produto</p>
+                <div class="product-meta">
+                    <span class="product-weight" th:text="${produto.peso}">500g</span>
+                    <strong class="product-price" th:text="${#numbers.formatCurrency(produto.preco)}">R$ 0,00</strong>
+                </div>
+                <button class="buy-btn"
+                        type="button"
+                        th:attr="data-id=${produto.id},data-nome=${produto.nome},data-preco=${produto.preco},data-peso=${produto.peso}">
+                    Comprar
+                </button>
+            </div>
+        </article>
+
+        <article class="empty-state" th:if="${#lists.isEmpty(produtos)}">
+            <h3>Nenhum produto ativo</h3>
+            <p>Em breve teremos novidades no cardapio. Volte em alguns minutos.</p>
+        </article>
+    </section>
+</main>
+
+<section class="cart-sheet" id="cartSheet" aria-live="polite">
+    <header class="cart-header">
+        <h2>Seu pedido</h2>
+        <button type="button" id="clearCartBtn" class="ghost-btn">Limpar</button>
+    </header>
+
+    <div class="cart-items" id="cartItems">
+        <p class="cart-empty">Seu carrinho esta vazio.</p>
+    </div>
+
+    <footer class="cart-footer">
+        <div class="cart-total-row">
+            <span>Total</span>
+            <strong id="cartTotal">R$ 0,00</strong>
+        </div>
+        <a id="whatsAppCheckout"
+           class="checkout-btn"
+           th:attr="data-whatsapp=${whatsappNumber},data-prefix=${whatsappMessagePrefix}">
+            Realizar pedido via WhatsApp
+        </a>
+    </footer>
+</section>
+
+<nav class="mobile-cart-bar" id="mobileCartBar">
+    <button type="button" id="openCartBtn" class="cart-toggle-btn">
+        <span class="cart-count" id="cartCount">0</span>
+        Ver pedido
+    </button>
+</nav>
+
+<script th:src="@{/js/cardapio.js}"></script>
+</body>
+</html>

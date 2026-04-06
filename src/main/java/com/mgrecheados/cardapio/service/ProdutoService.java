@@ -41,6 +41,10 @@ public class ProdutoService {
         return produtoRepository.findAll();
     }
 
+    public List<Produto> listarAtivos() {
+        return produtoRepository.findByAtivoTrueOrderByNomeAsc();
+    }
+
     public Produto buscarPorId(UUID id) {
         ValidationUtils.validarCampoObrigatorio(id, ID_PRODUTO_CAMPO);
         return produtoRepository.findById(id)
