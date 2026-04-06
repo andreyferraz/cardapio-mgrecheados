@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>MG Recheados | Cardapio</title>
+    <title>MG Recheados | Cardápio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
@@ -11,13 +11,21 @@
 </head>
 <body>
 <header class="topbar">
-    <div class="brand-wrap">
-        <img class="brand-logo" th:src="@{/img/logo.png}" src="/img/logo.png" alt="Logo MG Recheados">
-        <div class="brand-block">
-            <h1 class="brand-title">MG Recheados</h1>
-            <p class="brand-subtitle">Cardapio digital artesanal</p>
+    <div class="topbar-inner">
+        <div class="brand-wrap">
+            <img class="brand-logo" th:src="@{/img/logo.png}" src="/img/logo.png" alt="Logo MG Recheados">
+            <div class="brand-block">
+                <p class="brand-subtitle">Cardápio Digital</p>
+            </div>
         </div>
-        <span class="brand-star" aria-hidden="true">★</span>
+
+        <div class="top-admin-actions" sec:authorize="hasRole('ADMIN')">
+            <a class="top-login-btn" th:href="@{/admin/dashboard}">Painel</a>
+            <form th:action="@{/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="top-logout-btn">Sair</button>
+            </form>
+        </div>
     </div>
 </header>
 
@@ -43,7 +51,7 @@
             </div>
             <div class="product-body">
                 <h3 th:text="${produto.nome}">Produto</h3>
-                <p class="product-description" th:text="${produto.descricao}">Descricao do produto</p>
+                <p class="product-description" th:text="${produto.descricao}">Descrição do produto</p>
                 <div class="product-meta">
                     <span class="product-weight" th:text="${produto.peso}">500g</span>
                     <strong class="product-price" th:text="${#numbers.formatCurrency(produto.preco)}">R$ 0,00</strong>
@@ -58,15 +66,25 @@
 
         <article class="empty-state" th:if="${#lists.isEmpty(produtos)}">
             <h3>Nenhum produto ativo</h3>
-            <p>Em breve teremos novidades no cardapio. Volte em alguns minutos.</p>
+            <p>Em breve teremos novidades no cardápio. Volte em alguns minutos.</p>
         </article>
     </section>
 </main>
 
+<footer class="site-footer">
+    <p>
+        &copy; 2026 Desenvolvido por
+        <a href="https://www.andreyferraz.com.br" target="_blank" rel="noopener noreferrer">Andrey Ferraz</a>
+    </p>
+</footer>
+
 <section class="cart-sheet" id="cartSheet" aria-live="polite">
     <header class="cart-header">
         <h2>Seu pedido</h2>
-        <button type="button" id="clearCartBtn" class="ghost-btn">Limpar</button>
+        <div class="cart-header-actions">
+            <button type="button" id="clearCartBtn" class="ghost-btn">Limpar</button>
+            <button type="button" id="closeCartBtn" class="ghost-btn">Fechar</button>
+        </div>
     </header>
 
     <div class="cart-items" id="cartItems">

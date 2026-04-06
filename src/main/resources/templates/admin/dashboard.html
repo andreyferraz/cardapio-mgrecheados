@@ -15,7 +15,7 @@
         <img class="admin-brand-logo" th:src="@{/img/logo.png}" src="/img/logo.png" alt="Logo MG Recheados">
         <div>
             <h1>Admin de Produtos</h1>
-            <p>Gestao do cardapio digital</p>
+            <p>Gestão do cardápio digital</p>
         </div>
     </div>
     <form th:action="@{/logout}" method="post">
@@ -27,7 +27,7 @@
 <main class="admin-content">
     <div class="actions-row">
         <a th:href="@{/admin/produtos/novo}" class="primary-btn">Novo produto</a>
-        <a th:href="@{/cardapio}" class="ghost-btn">Ver cardapio publico</a>
+        <a th:href="@{/cardapio}" class="ghost-btn">Ver cardápio público</a>
     </div>
 
     <div class="alert success" th:if="${successMessage}" th:text="${successMessage}"></div>
@@ -41,7 +41,7 @@
                  th:alt="${produto.nome}">
             <div class="admin-product-body">
                 <h2 th:text="${produto.nome}">Produto</h2>
-                <p th:text="${produto.descricao}">Descricao</p>
+                <p th:text="${produto.descricao}">Descrição</p>
                 <div class="meta-row">
                     <span th:text="${produto.peso}">500g</span>
                     <strong th:text="${#numbers.formatCurrency(produto.preco)}">R$ 0,00</strong>
@@ -63,7 +63,7 @@
 
     <section class="empty-card" th:if="${#lists.isEmpty(produtos)}">
         <h2>Nenhum produto cadastrado</h2>
-        <p>Comece adicionando o primeiro item do seu cardapio.</p>
+        <p>Comece adicionando o primeiro item do seu cardápio.</p>
     </section>
 </main>
 </body>

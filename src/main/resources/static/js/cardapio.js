@@ -8,6 +8,7 @@ const elements = {
     cartSheet: document.getElementById("cartSheet"),
     openCartBtn: document.getElementById("openCartBtn"),
     clearCartBtn: document.getElementById("clearCartBtn"),
+    closeCartBtn: document.getElementById("closeCartBtn"),
     checkoutBtn: document.getElementById("whatsAppCheckout")
 };
 
@@ -170,6 +171,10 @@ function bindBuyButtons() {
 function bindCartEvents() {
     elements.openCartBtn.addEventListener("click", () => {
         elements.cartSheet.classList.toggle("open");
+    });
+
+    elements.closeCartBtn.addEventListener("click", () => {
+        elements.cartSheet.classList.remove("open");
     });
 
     elements.clearCartBtn.addEventListener("click", () => {
