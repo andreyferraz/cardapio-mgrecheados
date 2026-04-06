@@ -73,8 +73,8 @@
 
 <footer class="site-footer">
     <p>
-        &copy; 2026 Desenvolvido por
-        <a href="https://www.andreyferraz.com.br" target="_blank" rel="noopener noreferrer">Andrey Ferraz</a>
+        &copy; <span id="year"></span> Desenvolvido por
+        <a href="https://www.andreyferraz.com.br" target="_blank" rel="noopener noreferrer">Andrêy Ferraz</a>
     </p>
 </footer>
 
@@ -112,5 +112,8 @@
 </nav>
 
 <script th:src="@{/js/cardapio.js}"></script>
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
 </body>
 </html>
