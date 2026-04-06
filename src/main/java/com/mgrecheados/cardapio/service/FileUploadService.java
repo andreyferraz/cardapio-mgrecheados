@@ -2,12 +2,16 @@ package com.mgrecheados.cardapio.service;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import java.awt.image.BufferedImage;
 
@@ -26,7 +30,7 @@ import com.mgrecheados.cardapio.exception.FileUploadException;
 
 @Service
 public class FileUploadService {
-@Value("${upload.dir}")
+    @Value("${upload.dir}")
     private String uploadDir;
 
     @Value("${upload.webp.quality:0.75}")
@@ -57,11 +61,13 @@ public class FileUploadService {
             String nomeArquivoBase = UUID.randomUUID().toString();
             String nomeArquivoWebp = nomeArquivoBase + ".webp";
             Path caminhoArquivoWebp = uploadPath.resolve(nomeArquivoWebp);
-            converterESalvarWebp(imagemFile, caminhoArquivoWebp);
+            converterESalvarWebpComFallback(imagemFile, caminhoArquivoWebp);
             return nomeArquivoWebp;
 
         } catch (IOException e) {
             throw new FileUploadException("Não foi possível salvar a imagem. Erro: " + e.getMessage(), e);
+        } catch (RuntimeException e) {
+            throw new FileUploadException("Falha ao processar imagem para WebP. Verifique se o arquivo enviado eh uma imagem suportada.", e);
         }
     }
 
@@ -153,6 +159,9 @@ public class FileUploadService {
     }
 
     private void converterESalvarWebp(MultipartFile imagemFile, Path caminhoArquivo) throws IOException {
+        // Garante que plugins de ImageIO sejam descobertos no runtime.
+        ImageIO.scanForPlugins();
+
         BufferedImage bufferedImage;
         try (InputStream inputStream = imagemFile.getInputStream()) {
             bufferedImage = ImageIO.read(inputStream);
@@ -162,12 +171,11 @@ public class FileUploadService {
             throw new FileUploadException("Arquivo enviado nao eh uma imagem valida");
         }
 
-        Iterator<ImageWriter> writers = ImageIO.getImageWritersByMIMEType("image/webp");
-        if (!writers.hasNext()) {
-            throw new FileUploadException("Encoder WebP nao encontrado. Verifique a dependencia de WebP no projeto");
-        }
+        ImageWriter writer = obterWriterWebp()
+                .orElseThrow(() -> new FileUploadException(
+                "Encoder WebP nao encontrado. Verifique se a dependencia de WebP esta instalada e compativel com o ambiente. "
+                    + "Writers detectados: " + listarWritersDisponiveis()));
 
-        ImageWriter writer = writers.next();
         ImageWriteParam writeParam = writer.getDefaultWriteParam();
         if (writeParam.canWriteCompressed()) {
             writeParam.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
@@ -180,9 +188,100 @@ public class FileUploadService {
         try (ImageOutputStream imageOutputStream = ImageIO.createImageOutputStream(Files.newOutputStream(caminhoArquivo))) {
             writer.setOutput(imageOutputStream);
             writer.write(null, new IIOImage(bufferedImage, null, null), writeParam);
+        } catch (UnsatisfiedLinkError | ExceptionInInitializerError | NoClassDefFoundError ex) {
+            converterESalvarWebpViaCli(imagemFile, caminhoArquivo, ex);
         } finally {
             writer.dispose();
         }
+    }
+
+    private void converterESalvarWebpComFallback(MultipartFile imagemFile, Path caminhoArquivo) throws IOException {
+        try {
+            converterESalvarWebp(imagemFile, caminhoArquivo);
+        } catch (UnsatisfiedLinkError | ExceptionInInitializerError | NoClassDefFoundError ex) {
+            converterESalvarWebpViaCli(imagemFile, caminhoArquivo, ex);
+        }
+    }
+
+    private void converterESalvarWebpViaCli(MultipartFile imagemFile, Path caminhoArquivo, Throwable causaOriginal)
+            throws IOException {
+        Path arquivoTemporarioEntrada = Files.createTempFile("upload-webp-in-", ".img");
+        try {
+            imagemFile.transferTo(arquivoTemporarioEntrada);
+
+            String qualidade = String.valueOf(Math.round(Math.max(0.0f, Math.min(1.0f, webpQuality)) * 100));
+            ProcessBuilder processBuilder = new ProcessBuilder(
+                    "cwebp",
+                    "-q",
+                    qualidade,
+                    arquivoTemporarioEntrada.toString(),
+                    "-o",
+                    caminhoArquivo.toString());
+            processBuilder.redirectErrorStream(true);
+
+            Process process = processBuilder.start();
+            String saida = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+
+            int exitCode = aguardarProcesso(process);
+
+            if (exitCode != 0 || !Files.exists(caminhoArquivo)) {
+                throw new FileUploadException(
+                        "Falha ao converter imagem para WebP. O encoder Java falhou por incompatibilidade de arquitetura e o cwebp tambem falhou. "
+                                + "Saida do cwebp: " + saida,
+                        causaOriginal);
+            }
+        } catch (IOException ioEx) {
+            if (!comandoDisponivel("cwebp")) {
+                throw new FileUploadException(
+                        "Falha ao converter imagem para WebP por incompatibilidade de arquitetura do encoder Java. "
+                                + "Instale o cwebp no macOS com: brew install webp",
+                        causaOriginal);
+            }
+            throw ioEx;
+        } finally {
+            Files.deleteIfExists(arquivoTemporarioEntrada);
+        }
+    }
+
+    private boolean comandoDisponivel(String comando) {
+        try {
+            Process process = new ProcessBuilder("sh", "-c", "command -v " + comando).start();
+            int exitCode = process.waitFor();
+            return exitCode == 0;
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            return false;
+        } catch (IOException ex) {
+            return false;
+        }
+    }
+
+    private int aguardarProcesso(Process process) {
+        try {
+            return process.waitFor();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new FileUploadException("Conversao para WebP interrompida.", e);
+        }
+    }
+
+    private Optional<ImageWriter> obterWriterWebp() {
+        Iterator<ImageWriter> byFormat = ImageIO.getImageWritersByFormatName("webp");
+        if (byFormat.hasNext()) {
+            return Optional.of(byFormat.next());
+        }
+
+        Iterator<ImageWriter> bySuffix = ImageIO.getImageWritersBySuffix("webp");
+        if (bySuffix.hasNext()) {
+            return Optional.of(bySuffix.next());
+        }
+
+        Iterator<ImageWriter> byMime = ImageIO.getImageWritersByMIMEType("image/webp");
+        if (byMime.hasNext()) {
+            return Optional.of(byMime.next());
+        }
+
+        return Optional.empty();
     }
 
     private String extrairExtensao(String nomeArquivo) {
@@ -191,6 +290,14 @@ public class FileUploadService {
             return "";
         }
         return nomeArquivo.substring(ultimoPonto + 1).toLowerCase(Locale.ROOT);
+    }
+
+    private String listarWritersDisponiveis() {
+        return Stream.of(ImageIO.getWriterFormatNames())
+                .map(String::toLowerCase)
+                .distinct()
+                .sorted()
+                .collect(Collectors.joining(", "));
     }
 
 }

@@ -1,6 +1,10 @@
 package com.mgrecheados.cardapio.controller;
 
 import java.util.UUID;
+import java.util.function.Supplier;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,6 +24,8 @@ import com.mgrecheados.cardapio.service.ProdutoService;
 @Controller
 @RequestMapping("/admin")
 public class AdminProdutoController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AdminProdutoController.class);
 
     private static final String REDIRECT_DASHBOARD = "redirect:/admin/dashboard";
     private static final String SUCCESS_MESSAGE = "successMessage";
@@ -55,6 +61,7 @@ public class AdminProdutoController {
             produtoService.cadastrar(produto, imagemFile);
             redirectAttributes.addFlashAttribute(SUCCESS_MESSAGE, "Produto cadastrado com sucesso.");
         } catch (RuntimeException ex) {
+            logErro("Erro ao cadastrar produto", ex, produtoForm::getNome);
             redirectAttributes.addFlashAttribute(ERROR_MESSAGE, ex.getMessage());
             return "redirect:/admin/produtos/novo";
         }
@@ -70,6 +77,7 @@ public class AdminProdutoController {
             model.addAttribute("isEdicao", true);
             return "admin/produto-form";
         } catch (RuntimeException ex) {
+            LOGGER.error("Erro ao abrir tela de edicao do produto {}", id, ex);
             redirectAttributes.addFlashAttribute(ERROR_MESSAGE, ex.getMessage());
             return REDIRECT_DASHBOARD;
         }
@@ -86,6 +94,7 @@ public class AdminProdutoController {
             redirectAttributes.addFlashAttribute(SUCCESS_MESSAGE, "Produto atualizado com sucesso.");
             return REDIRECT_DASHBOARD;
         } catch (RuntimeException ex) {
+            logErro("Erro ao atualizar produto", ex, () -> String.valueOf(id));
             redirectAttributes.addFlashAttribute(ERROR_MESSAGE, ex.getMessage());
             return "redirect:/admin/produtos/" + id + "/editar";
         }
@@ -97,8 +106,13 @@ public class AdminProdutoController {
             produtoService.remover(id);
             redirectAttributes.addFlashAttribute(SUCCESS_MESSAGE, "Produto removido com sucesso.");
         } catch (RuntimeException ex) {
+            LOGGER.error("Erro ao excluir produto {}", id, ex);
             redirectAttributes.addFlashAttribute(ERROR_MESSAGE, ex.getMessage());
         }
         return REDIRECT_DASHBOARD;
+    }
+
+    private void logErro(String mensagem, RuntimeException ex, Supplier<String> contexto) {
+        LOGGER.error("{} [{}]", mensagem, contexto.get(), ex);
     }
 }
