@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -246,14 +245,6 @@ public class FileUploadService {
         }
 
         return Optional.empty();
-    }
-
-    private String extrairExtensao(String nomeArquivo) {
-        int ultimoPonto = nomeArquivo.lastIndexOf('.');
-        if (ultimoPonto <= 0 || ultimoPonto == nomeArquivo.length() - 1) {
-            return "";
-        }
-        return nomeArquivo.substring(ultimoPonto + 1).toLowerCase(Locale.ROOT);
     }
 
     private String listarWritersDisponiveis() {
