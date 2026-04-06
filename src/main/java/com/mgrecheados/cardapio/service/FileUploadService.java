@@ -2,7 +2,6 @@ package com.mgrecheados.cardapio.service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,7 +34,7 @@ public class FileUploadService {
 
     /**
      * Salva uma imagem no diretório configurado e retorna o nome do arquivo gerado.
-     * Tenta salvar em WebP e usa fallback PNG quando o encoder nativo não está disponível.
+        * Sempre converte para WebP.
      *
      * @param imagemFile O arquivo MultipartFile a ser salvo
      * @return O nome do arquivo gerado
@@ -56,7 +55,10 @@ public class FileUploadService {
             }
 
             String nomeArquivoBase = UUID.randomUUID().toString();
-            return salvarImagemComFallback(imagemFile, uploadPath, nomeArquivoBase);
+            String nomeArquivoWebp = nomeArquivoBase + ".webp";
+            Path caminhoArquivoWebp = uploadPath.resolve(nomeArquivoWebp);
+            converterESalvarWebp(imagemFile, caminhoArquivoWebp);
+            return nomeArquivoWebp;
 
         } catch (IOException e) {
             throw new FileUploadException("Não foi possível salvar a imagem. Erro: " + e.getMessage(), e);
@@ -180,39 +182,6 @@ public class FileUploadService {
             writer.write(null, new IIOImage(bufferedImage, null, null), writeParam);
         } finally {
             writer.dispose();
-        }
-    }
-
-    private String salvarImagemComFallback(MultipartFile imagemFile, Path uploadPath, String nomeArquivoBase) throws IOException {
-        String nomeArquivoWebp = nomeArquivoBase + ".webp";
-        Path caminhoArquivoWebp = uploadPath.resolve(nomeArquivoWebp);
-
-        try {
-            converterESalvarWebp(imagemFile, caminhoArquivoWebp);
-            return nomeArquivoWebp;
-        } catch (UnsatisfiedLinkError | ExceptionInInitializerError | NoClassDefFoundError ex) {
-            String nomeArquivoPng = nomeArquivoBase + ".png";
-            Path caminhoArquivoPng = uploadPath.resolve(nomeArquivoPng);
-            converterESalvarPng(imagemFile, caminhoArquivoPng);
-            return nomeArquivoPng;
-        }
-    }
-
-    private void converterESalvarPng(MultipartFile imagemFile, Path caminhoArquivo) throws IOException {
-        BufferedImage bufferedImage;
-        try (InputStream inputStream = imagemFile.getInputStream()) {
-            bufferedImage = ImageIO.read(inputStream);
-        }
-
-        if (bufferedImage == null) {
-            throw new FileUploadException("Arquivo enviado nao eh uma imagem valida");
-        }
-
-        try (OutputStream outputStream = Files.newOutputStream(caminhoArquivo)) {
-            boolean sucesso = ImageIO.write(bufferedImage, "png", outputStream);
-            if (!sucesso) {
-                throw new FileUploadException("Nao foi possivel codificar a imagem em PNG");
-            }
         }
     }
 
